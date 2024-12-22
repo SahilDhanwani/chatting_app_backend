@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.chatting_app_backend.model.messages;
 import com.example.chatting_app_backend.model.user;
+import com.example.chatting_app_backend.repository.MessageRepository;
 import com.example.chatting_app_backend.repository.repository;
 
 @Service
@@ -13,6 +15,9 @@ public class service {
 
     @Autowired
     private repository repo;
+
+    @Autowired
+    private MessageRepository messageRepository;
 
     public List<user> getAllUsers() {
         return repo.findAll();
@@ -31,14 +36,26 @@ public class service {
         return true;
     }
 
-    public boolean login(user user) {
+    public int login(user user) {
         List<user> users = repo.findByUsernameOrEmail(user.getUsername(), user.getEmail());
         if (users.isEmpty()) {
-            return false;
+            return 0;
         }
         user user1 = users.get(0);
         
-        return user1.getPassword().equals(user.getPassword());
+        return user1.getPassword().equals(user.getPassword())? user1.getId(): 0;
+    }
+
+    public messages saveMessage(messages message) {
+        return messageRepository.save(message);
+    }
+
+    public List<messages> getAllMessages() {
+        return messageRepository.findAll();
+    }
+
+    public List<String> getAllUsernames() {
+       return repo.findAllUsernames();
     }
 
 }

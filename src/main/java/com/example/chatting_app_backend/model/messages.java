@@ -1,5 +1,7 @@
 package com.example.chatting_app_backend.model;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,9 +14,10 @@ public class messages {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String message;
-    private String sender_id;
-    private String receiver_id;
-    private String timestamp;
+    private int sender_id;
+    private int receiver_id;
+    private LocalDateTime timestamp;
+
     public int getId() {
         return id;
     }
@@ -27,23 +30,22 @@ public class messages {
     public void setMessage(String message) {
         this.message = message;
     }
-    public String getSender_id() {
+    public int getSender_id() {
         return sender_id;
     }
-    public void setSender_id(String sender_id) {
+    public void setSender_id(int sender_id) {
         this.sender_id = sender_id;
     }
-    public String getReceiver_id() {
+    public int getReceiver_id() {
         return receiver_id;
     }
-    public void setReceiver_id(String receiver_id) {
+    public void setReceiver_id(int receiver_id) {
         this.receiver_id = receiver_id;
     }
     public String getTimestamp() {
-        return timestamp;
+        return timestamp.toString();
     }
-    public void setTimestamp(String timestamp) {
+    public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
     }
-
 }

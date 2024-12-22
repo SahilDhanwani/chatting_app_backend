@@ -17,7 +17,7 @@ import com.example.chatting_app_backend.services.service;
 @RestController
 @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS})
 @RequestMapping("/api")
-public class controller {
+public class HttpController {
 
     @Autowired
     service ser;
@@ -27,13 +27,18 @@ public class controller {
         return ser.getAllUsers();
     }
 
+    @GetMapping("/allUsernames")
+    public List<String> getAllUsernames() {
+        return ser.getAllUsernames();
+    }
+
     @PostMapping("/auth/signup")
     public boolean signUp(@RequestBody user user) {
         return ser.signup(user);
     }
 
     @PostMapping("/auth/login")
-    public boolean login(@RequestBody user user) {
+    public int login(@RequestBody user user) {
         return ser.login(user);
     }
 }
