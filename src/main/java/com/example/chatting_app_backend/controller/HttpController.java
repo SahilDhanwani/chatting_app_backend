@@ -1,6 +1,8 @@
 package com.example.chatting_app_backend.controller;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -22,14 +24,31 @@ public class HttpController {
     @Autowired
     service ser;
 
-    @GetMapping("/allUsers")
-    public List<user> getAllUsers() {
-        return ser.getAllUsers();
-    }
+    // @PostMapping("/addlastmessage")
+    // public void addLastMessage(@RequestBody lastMessage user) {
+    //     ser.addLastMessage(user);
+    // }
+
+    // @GetMapping("/allUsers")
+    // public List<user> getAllUsers() {
+    //     return ser.getAllUsers();
+    // }
 
     @GetMapping("/allUsernames")
     public List<String> getAllUsernames() {
         return ser.getAllUsernames();
+    }
+
+    @GetMapping("/getUsername")
+    public Map<String, String> getUsername(int id) {
+        Map<String, String> response = new HashMap<>();
+        response.put("username", ser.getUsername(id));
+        return response;
+    }
+
+    @GetMapping("/getId")
+    public int getId(String username) {
+        return ser.getId(username);
     }
 
     @PostMapping("/auth/signup")
@@ -40,5 +59,15 @@ public class HttpController {
     @PostMapping("/auth/login")
     public int login(@RequestBody user user) {
         return ser.login(user);
+    }
+
+    @GetMapping("/activeChats")
+    public List<Object[]> getActiveChats(String username) {
+        return ser.getActiveChats(username);
+    }
+
+    @GetMapping("/getMessages")
+    public Map<String,String> getMessages(int user1, int user2) {
+        return ser.getMessages(user1, user2);
     }
 }

@@ -1,12 +1,15 @@
 package com.example.chatting_app_backend.services;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.chatting_app_backend.model.messages;
 import com.example.chatting_app_backend.model.user;
+import com.example.chatting_app_backend.repository.LastMessageRepository;
 import com.example.chatting_app_backend.repository.MessageRepository;
 import com.example.chatting_app_backend.repository.repository;
 
@@ -17,11 +20,18 @@ public class service {
     private repository repo;
 
     @Autowired
-    private MessageRepository messageRepository;
+    private MessageRepository m_repo;
 
-    public List<user> getAllUsers() {
-        return repo.findAll();
-    }
+    @Autowired
+    private LastMessageRepository lm_repo;
+
+    // public void addLastMessage(lastMessage message) {
+    //     lastMessageRepository.save(message);
+    // }
+
+    // public List<user> getAllUsers() {
+    //     return repo.findAll();
+    // }
 
     public List<user> findByUsernameOrEmail(String username, String email) {
         return repo.findByUsernameOrEmail(username, email);
@@ -47,15 +57,34 @@ public class service {
     }
 
     public messages saveMessage(messages message) {
-        return messageRepository.save(message);
+        return m_repo.save(message);
     }
 
     public List<messages> getAllMessages() {
-        return messageRepository.findAll();
+        return m_repo.findAll();
     }
 
     public List<String> getAllUsernames() {
        return repo.findAllUsernames();
     }
 
+    public List<Object[]> getActiveChats(String username) {
+        return lm_repo.findLastMessage(username);
+    }
+
+    public String getUsername(int id) {
+        return repo.findById(id).get().getUsername();
+    }
+
+    public Map<String, String> getMessages(int user1, int user2) {
+        Map<String, String> response = new HashMap<>();
+        m_repo.findMessages(user1, user2).forEach(message -> {
+            response.put((String) message[0], (int) message[1]==user1? "me" : "other");
+        });
+        return response;
+    }
+
+    public int getId(String username) {
+        return repo.findByUsername(username).get(0).getId();
+    }
 }
