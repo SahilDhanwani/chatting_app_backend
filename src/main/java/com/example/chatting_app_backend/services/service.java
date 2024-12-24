@@ -1,9 +1,6 @@
 package com.example.chatting_app_backend.services;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -76,12 +73,8 @@ public class service {
         return repo.findById(id).get().getUsername();
     }
 
-    public Map<String, String> getMessages(int user1, int user2) {
-        Map<String, String> response = new HashMap<>();
-        m_repo.findMessages(user1, user2).forEach(message -> {
-            response.put((String) message[0], (int) message[1]==user1? "me" : "other");
-        });
-        return response;
+    public List<Object[]> getMessages(int user1, int user2) {
+        return m_repo.findMessages(user1, user2);
     }
 
     public int getId(String username) {

@@ -67,7 +67,7 @@ public class HttpController {
     }
 
     @GetMapping("/getMessages")
-    public Map<String,String> getMessages(int user1, int user2) {
+    public List<Object[]> getMessages(int user1, int user2) {
         return ser.getMessages(user1, user2);
     }
 }
