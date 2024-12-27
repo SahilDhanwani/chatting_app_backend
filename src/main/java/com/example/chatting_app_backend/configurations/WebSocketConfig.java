@@ -11,16 +11,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(@SuppressWarnings("null") StompEndpointRegistry registry) {
-        // Register WebSocket endpoint
-        registry.addEndpoint("/ws/chat")
-                .setAllowedOrigins("http://localhost:4200")
-                .withSockJS();
+        // Register WebSocket endpoint for SockJS
+        registry.addEndpoint("/ws/chat") // Endpoint to connect to WebSocket
+                .setAllowedOrigins("http://localhost:4200") // Allow Angular app to connect
+                .withSockJS(); // Fall-back to SockJS if WebSocket is not supported
     }
 
     @Override
     public void configureMessageBroker(@SuppressWarnings("null") org.springframework.messaging.simp.config.MessageBrokerRegistry registry) {
-        // Configure message broker
-        registry.enableSimpleBroker("/topic");
-        registry.setApplicationDestinationPrefixes("/app");
+        // Message broker configuration
+        registry.enableSimpleBroker("/topic"); // Set up /topic for broadcasting messages
+        registry.setApplicationDestinationPrefixes("/app"); // Prefix for application messages
     }
 }

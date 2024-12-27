@@ -1,8 +1,8 @@
 package com.example.chatting_app_backend.controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.chatting_app_backend.model.user;
 import com.example.chatting_app_backend.services.service;
+import com.example.chatting_app_backend.model.messages;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS})
@@ -69,5 +70,10 @@ public class HttpController {
     @GetMapping("/getMessages")
     public List<Object[]> getMessages(int user1, int user2) {
         return ser.getMessages(user1, user2);
+    }
+
+    @PostMapping("/saveMessage")
+    public void saveMessage(@RequestBody messages message) {
+        ser.saveMessage(message);
     }
 }
