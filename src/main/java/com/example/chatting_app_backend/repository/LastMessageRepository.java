@@ -13,4 +13,6 @@ public interface LastMessageRepository extends JpaRepository<lastMessage, Intege
 
     @Query("SELECT user2,lastMessage FROM lastMessage WHERE user1 = ?1")
     public List<Object[]> findLastMessage(String user1);
+
+    public lastMessage findByUser1AndUser2(String user1, String user2);
 }

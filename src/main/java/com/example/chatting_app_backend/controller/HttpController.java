@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.chatting_app_backend.model.user;
 import com.example.chatting_app_backend.services.service;
 import com.example.chatting_app_backend.model.messages;
+import com.example.chatting_app_backend.model.lastMessage;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS})
@@ -73,7 +74,12 @@ public class HttpController {
     }
 
     @PostMapping("/saveMessage")
-    public void saveMessage(@RequestBody messages message) {
-        ser.saveMessage(message);
+    public void saveMessage(@RequestBody messages m) {
+        ser.saveMessage(m);
+    }
+
+    @PostMapping("/saveLastMessage")
+    public void saveLastMessage(@RequestBody lastMessage lm) {
+        ser.saveLastMessage(lm);
     }
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.chatting_app_backend.model.lastMessage;
 import com.example.chatting_app_backend.model.messages;
 import com.example.chatting_app_backend.model.user;
 import com.example.chatting_app_backend.repository.LastMessageRepository;
@@ -79,5 +80,18 @@ public class service {
 
     public int getId(String username) {
         return repo.findByUsername(username).get(0).getId();
+    }
+
+    public void saveLastMessage(lastMessage lm) {
+        lastMessage existingRecord = lm_repo.findByUser1AndUser2(lm.getUser1(), lm.getUser2());
+
+        if (existingRecord != null) {
+            // Update the existing record
+            existingRecord.setLastMessage(lm.getLastMessage());
+            lm_repo.save(existingRecord);
+        } else {
+            // Save as a new record
+            lm_repo.save(lm);
+        }
     }
 }
