@@ -1,15 +1,28 @@
 package com.example.chatting_app_backend.services;
 
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import com.example.chatting_app_backend.Other.JwtUtil;
 import com.example.chatting_app_backend.model.lastMessage;
 import com.example.chatting_app_backend.model.messages;
 import com.example.chatting_app_backend.model.user;
 import com.example.chatting_app_backend.repository.LastMessageRepository;
 import com.example.chatting_app_backend.repository.MessageRepository;
 import com.example.chatting_app_backend.repository.repository;
+import com.example.chatting_app_backend.responses.JwtResponse;
+import com.example.chatting_app_backend.responses.LoginResponse;
 
 @Service
 public class service {
@@ -23,35 +36,46 @@ public class service {
     @Autowired
     private LastMessageRepository lm_repo;
 
-    // public void addLastMessage(lastMessage message) {
-    //     lastMessageRepository.save(message);
-    // }
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-    // public List<user> getAllUsers() {
-    //     return repo.findAll();
-    // }
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
-    public List<user> findByUsernameOrEmail(String username, String email) {
-        return repo.findByUsernameOrEmail(username, email);
-    }
+    @Autowired
+    private JwtUtil jwtUtil;
 
     public boolean signup(user user) {
+        // Check if a user with the same username or email already exists
         int count = repo.findByUsernameOrEmail(user.getUsername(), user.getEmail()).size();
         if (count > 0) {
-            return false;
+            return false; // Return false if user exists
         }
-        repo.save(user);
+        // Encode the user's password before saving
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        repo.save(user); // Save user to database
         return true;
     }
 
-    public int login(user user) {
-        List<user> users = repo.findByUsernameOrEmail(user.getUsername(), user.getEmail());
-        if (users.isEmpty()) {
-            return 0;
+    public ResponseEntity<?> login(@RequestBody LoginResponse user) {
+        try {
+
+            int userId = repo.findByUsernameOrEmail(user.getUsername(), user.getUsername()).get(0).getId();
+            // Authenticate the user using Spring Security's AuthenticationManager
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(userId, user.getPassword())
+            );
+
+            // If authentication is successful, create and return the authentication token (JWT or similar)
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwtToken = jwtUtil.generateToken(userId);
+
+            // You can also return the user information along with the token if needed
+            return ResponseEntity.ok(new JwtResponse(jwtToken));  // Return the JWT in the response
+
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         }
-        user user1 = users.get(0);
-        
-        return user1.getPassword().equals(user.getPassword())? user1.getId(): 0;
     }
 
     public messages saveMessage(messages message) {

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,10 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.chatting_app_backend.model.user;
-import com.example.chatting_app_backend.services.service;
-import com.example.chatting_app_backend.model.messages;
 import com.example.chatting_app_backend.model.lastMessage;
+import com.example.chatting_app_backend.model.messages;
+import com.example.chatting_app_backend.model.user;
+import com.example.chatting_app_backend.responses.LoginResponse;
+import com.example.chatting_app_backend.services.service;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS})
@@ -25,16 +27,6 @@ public class HttpController {
 
     @Autowired
     service ser;
-
-    // @PostMapping("/addlastmessage")
-    // public void addLastMessage(@RequestBody lastMessage user) {
-    //     ser.addLastMessage(user);
-    // }
-
-    // @GetMapping("/allUsers")
-    // public List<user> getAllUsers() {
-    //     return ser.getAllUsers();
-    // }
 
     @GetMapping("/allUsernames")
     public List<String> getAllUsernames() {
@@ -59,7 +51,7 @@ public class HttpController {
     }
 
     @PostMapping("/auth/login")
-    public int login(@RequestBody user user) {
+    public ResponseEntity<?> login(@RequestBody LoginResponse user) {
         return ser.login(user);
     }
 
