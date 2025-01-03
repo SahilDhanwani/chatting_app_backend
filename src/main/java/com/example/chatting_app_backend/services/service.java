@@ -63,7 +63,7 @@ public class service {
             int userId = repo.findByUsernameOrEmail(user.getUsername(), user.getUsername()).get(0).getId();
             // Authenticate the user using Spring Security's AuthenticationManager
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(userId, user.getPassword())
+                    new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword())
             );
 
             // If authentication is successful, create and return the authentication token (JWT or similar)
@@ -74,7 +74,7 @@ public class service {
             return ResponseEntity.ok(new JwtResponse(jwtToken));  // Return the JWT in the response
 
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password" + e);
         }
     }
 
