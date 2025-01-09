@@ -2,7 +2,6 @@ package com.example.chatting_app_backend.configurations;
 
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -13,14 +12,14 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
-import com.example.chatting_app_backend.Other.JwtUtil;
+// import jakarta.servlet.ServletRequest;
 
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    // @Autowired
+    // private JwtUtil jwtUtil;
 
     @SuppressWarnings("null")
     @Override
@@ -35,23 +34,17 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         WebSocketHandler wsHandler,
                         Map<String, Object> attributes
                     ) {
-                        System.out.println("Handshake intercepted");
-                        // Extract token from query parameters
-                        String token = request.getHeaders().getFirst("Authorization");
+                        return true;
+                        // System.out.println("The request is received : "+ request);
 
-                        if (token != null && token.startsWith("Bearer ")) {
-                            token = token.substring(7); // Remove "Bearer " prefix
-
-                            System.out.println("Token: " + token);
-
-                            if (jwtUtil.validateToken(token)) {
-                                System.out.println("Token is valid");
-                                String username = jwtUtil.extractUsername(token);
-                                attributes.put("username", username); // Attach username to WebSocket attributes
-                                return true; // Allow handshake
-                            }
-                        }
-                        return false; // Reject handshake if token is invalid
+                        // String token = jwtUtil.extractTokenFromCookie((ServletRequest) request);
+                        // System.out.println("The token is received : "+ token);
+                        // if (jwtUtil.validateToken(token)) {
+                        //     String username = jwtUtil.extractUsername(token);
+                        //     attributes.put("username", username); // Attach username to WebSocket session
+                        //     return true; // Allow handshake
+                        // }
+                        // return false; // Reject handshake if token is invalid
                     }
 
                     @Override

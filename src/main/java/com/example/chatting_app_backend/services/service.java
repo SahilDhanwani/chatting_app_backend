@@ -21,8 +21,12 @@ import com.example.chatting_app_backend.model.user;
 import com.example.chatting_app_backend.repository.LastMessageRepository;
 import com.example.chatting_app_backend.repository.MessageRepository;
 import com.example.chatting_app_backend.repository.repository;
-import com.example.chatting_app_backend.responses.JwtResponse;
 import com.example.chatting_app_backend.responses.LoginResponse;
+import com.example.chatting_app_backend.responses.getUsernameResponse;
+
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Service
 public class service {
@@ -49,32 +53,44 @@ public class service {
         // Check if a user with the same username or email already exists
         int count = repo.findByUsernameOrEmail(user.getUsername(), user.getEmail()).size();
         if (count > 0) {
-            return false; // Return false if user exists
+            return false; // User already exists
         }
+    
         // Encode the user's password before saving
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        repo.save(user); // Save user to database
+        repo.save(user); // Save user to the database
         return true;
     }
 
-    public ResponseEntity<?> login(@RequestBody LoginResponse user) {
+    public ResponseEntity<?> login(@RequestBody LoginResponse user, HttpServletResponse response) {
         try {
-
+            // Retrieve the user from the database by username or email
             int userId = repo.findByUsernameOrEmail(user.getUsername(), user.getUsername()).get(0).getId();
+            
             // Authenticate the user using Spring Security's AuthenticationManager
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword())
             );
 
-            // If authentication is successful, create and return the authentication token (JWT or similar)
+            // If authentication is successful, create and return the authentication token (JWT)
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwtToken = jwtUtil.generateToken(userId);
+            
+            // Create the HttpOnly cookie for the JWT
+            Cookie cookie = new Cookie("JWT", jwtToken);
+            cookie.setHttpOnly(true);  // Prevent JavaScript access to the token
+            cookie.setSecure(false);  // Only send the cookie over HTTPS if true
+            cookie.setPath("/");  // Make the cookie accessible across the whole domain
+            cookie.setMaxAge(3600);  // Set cookie expiration (1 hour for example)
 
-            // You can also return the user information along with the token if needed
-            return ResponseEntity.ok(new JwtResponse(jwtToken));  // Return the JWT in the response
+            // Add the cookie to the response
+            response.addCookie(cookie);
+
+            // Optionally, you can also return a success message or user info, but no need for the JWT in response body anymore.
+            return ResponseEntity.ok().build();  // HTTP 200 OK status without body (JWT is in the cookie)
 
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password" + e);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         }
     }
 
@@ -94,8 +110,10 @@ public class service {
         return lm_repo.findLastMessage(username);
     }
 
-    public String getUsername(int id) {
-        return repo.findById(id).get().getUsername();
+    public getUsernameResponse getUsername(ServletRequest request) {
+        int userId = jwtUtil.extractUserId(jwtUtil.extractTokenFromCookie(request));
+        String name = repo.findById(userId).get().getUsername();
+        return new getUsernameResponse(name);
     }
 
     public List<Object[]> getMessages(int user1, int user2) {

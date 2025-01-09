@@ -1,10 +1,9 @@
 package com.example.chatting_app_backend.controller;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +18,11 @@ import com.example.chatting_app_backend.model.lastMessage;
 import com.example.chatting_app_backend.model.messages;
 import com.example.chatting_app_backend.model.user;
 import com.example.chatting_app_backend.responses.LoginResponse;
+import com.example.chatting_app_backend.responses.getUsernameResponse;
 import com.example.chatting_app_backend.services.service;
+
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS})
@@ -35,10 +38,8 @@ public class HttpController {
     }
 
     @GetMapping("/getUsername")
-    public Map<String, String> getUsername(int id) {
-        Map<String, String> response = new HashMap<>();
-        response.put("username", ser.getUsername(id));
-        return response;
+    public getUsernameResponse getUsername(ServletRequest request) {
+        return ser.getUsername(request);
     }
 
     @GetMapping("/getId")
@@ -47,13 +48,23 @@ public class HttpController {
     }
 
     @PostMapping("/auth/signup")
-    public boolean signUp(@RequestBody user user) {
-        return ser.signup(user);
+    public ResponseEntity<?> signUp(@RequestBody user user) {
+        try {
+
+            if (ser.signup(user)) {
+                return ResponseEntity.status(HttpStatus.CREATED).body("User created successfully!");
+            } else {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Username or Email already exists!");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
+        }
     }
 
     @PostMapping("/auth/login")
-    public ResponseEntity<?> login(@RequestBody LoginResponse user) {
-        return ser.login(user);
+    public ResponseEntity<?> login(@RequestBody LoginResponse user, HttpServletResponse response) {
+        System.out.println(user);
+        return ser.login(user, response);
     }
 
     @GetMapping("/activeChats")

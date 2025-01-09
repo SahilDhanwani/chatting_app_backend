@@ -29,17 +29,18 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enable CORS
-            .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless APIs
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll() // Public endpoints
-                .anyRequest().authenticated() // Protect all other endpoints
+                .requestMatchers("/ws/chat/**").permitAll()  // Allow WebSocket handshake
+                .anyRequest().authenticated()
             )
-            .httpBasic(httpBasic -> httpBasic.disable()) // Disable HTTP Basic
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // JWT filter
-        
+            .httpBasic(httpBasic -> httpBasic.disable())
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
