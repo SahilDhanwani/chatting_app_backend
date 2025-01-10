@@ -86,4 +86,9 @@ public class HttpController {
     public void saveLastMessage(@RequestBody lastMessage lm) {
         ser.saveLastMessage(lm);
     }
+
+    @GetMapping("/validate")
+    public ResponseEntity<?> validate(ServletRequest request) {
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
 }
