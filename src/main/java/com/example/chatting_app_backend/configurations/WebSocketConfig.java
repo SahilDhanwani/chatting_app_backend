@@ -34,6 +34,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         WebSocketHandler wsHandler,
                         Map<String, Object> attributes
                     ) {
+
+                        
                         return true;
                         // System.out.println("The request is received : "+ request);
 

@@ -52,9 +52,9 @@ public class HttpController {
         try {
 
             if (ser.signup(user)) {
-                return ResponseEntity.status(HttpStatus.CREATED).body("User created successfully!");
+                return ResponseEntity.status(HttpStatus.OK).body(null);
             } else {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("Username or Email already exists!");
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
             }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
@@ -63,7 +63,6 @@ public class HttpController {
 
     @PostMapping("/auth/login")
     public ResponseEntity<?> login(@RequestBody LoginResponse user, HttpServletResponse response) {
-        System.out.println(user);
         return ser.login(user, response);
     }
 
