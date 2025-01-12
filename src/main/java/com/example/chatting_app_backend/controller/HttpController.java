@@ -50,7 +50,6 @@ public class HttpController {
     @PostMapping("/auth/signup")
     public ResponseEntity<?> signUp(@RequestBody user user) {
         try {
-
             if (ser.signup(user)) {
                 return ResponseEntity.status(HttpStatus.OK).body(null);
             } else {
@@ -67,8 +66,8 @@ public class HttpController {
     }
 
     @GetMapping("/activeChats")
-    public List<Object[]> getActiveChats(String username) {
-        return ser.getActiveChats(username);
+    public List<Object[]> getActiveChats(ServletRequest request) {
+        return ser.getActiveChats(request);
     }
 
     @GetMapping("/getMessages")
@@ -82,12 +81,12 @@ public class HttpController {
     }
 
     @PostMapping("/saveLastMessage")
-    public void saveLastMessage(@RequestBody lastMessage lm) {
+    public void saveLastMessage(@RequestBody lastMessage lm) { 
         ser.saveLastMessage(lm);
     }
 
     @GetMapping("/validate")
-    public ResponseEntity<?> validate(ServletRequest request) {
-        return ResponseEntity.status(HttpStatus.OK).body(null);
+    public int validate(ServletRequest request) {
+        return ser.validate(request);
     }
 }

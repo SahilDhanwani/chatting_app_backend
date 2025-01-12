@@ -35,8 +35,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         Map<String, Object> attributes
                     ) {
 
+                        String query = request.getURI().getQuery();
+                        if (query != null && query.contains("id=")) {
+                            String id = query.split("id=")[1];
+                            attributes.put("id", id); // Attach id to the WebSocket session
+                            System.out.println("The id is received: " + id);
+                            return true;
+                        }
+                        return false;
                         
-                        return true;
                         // System.out.println("The request is received : "+ request);
 
                         // String token = jwtUtil.extractTokenFromCookie((ServletRequest) request);
@@ -64,7 +71,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(@SuppressWarnings("null") MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/topic"); // Configure message broker for broadcasting messages
-        registry.setApplicationDestinationPrefixes("/app"); // Prefix for application messages
+        registry.enableSimpleBroker("/topic", "/queue"); // Use "/queue" for user-specific messages
+        registry.setApplicationDestinationPrefixes("/app");
+        registry.setUserDestinationPrefix("/user"); // Prefix for user-specific destinations
     }
 }

@@ -106,7 +106,10 @@ public class service {
        return repo.findAllUsernames();
     }
 
-    public List<Object[]> getActiveChats(String username) {
+    public List<Object[]> getActiveChats(ServletRequest request) {
+        String token = jwtUtil.extractTokenFromCookie(request);
+        int userId = jwtUtil.extractUserId(token);
+        String username = repo.findById(userId).get().getUsername();
         return lm_repo.findLastMessage(username);
     }
 
@@ -125,15 +128,22 @@ public class service {
     }
 
     public void saveLastMessage(lastMessage lm) {
+
         lastMessage existingRecord = lm_repo.findByUser1AndUser2(lm.getUser1(), lm.getUser2());
 
         if (existingRecord != null) {
+
             // Update the existing record
             existingRecord.setLastMessage(lm.getLastMessage());
             lm_repo.save(existingRecord);
         } else {
-            // Save as a new record
+            // Save as a new record 
             lm_repo.save(lm);
         }
+    }
+
+    public int validate(ServletRequest request) {
+        String token = jwtUtil.extractTokenFromCookie(request);
+        return jwtUtil.extractUserId(token);
     }
 }
