@@ -12,11 +12,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.chatting_app_backend.model.lastMessage;
-import com.example.chatting_app_backend.model.messages;
-import com.example.chatting_app_backend.model.user;
-import com.example.chatting_app_backend.responses.LoginResponse;
-import com.example.chatting_app_backend.responses.getUsernameResponse;
+import com.example.chatting_app_backend.data_packets.Requests.GetIdRequest;
+import com.example.chatting_app_backend.data_packets.Requests.GetMessagesRequest;
+import com.example.chatting_app_backend.data_packets.Requests.LoginRequest;
+import com.example.chatting_app_backend.data_packets.Requests.SaveLastMessageRequest;
+import com.example.chatting_app_backend.data_packets.Requests.SaveMessagesRequest;
+import com.example.chatting_app_backend.data_packets.Requests.SignupRequest;
+import com.example.chatting_app_backend.data_packets.Responses.ActiveChatsResponse;
+import com.example.chatting_app_backend.data_packets.Responses.GetAllUsernameResponse;
+import com.example.chatting_app_backend.data_packets.Responses.GetIdResponse;
+import com.example.chatting_app_backend.data_packets.Responses.GetMessagesResponse;
+import com.example.chatting_app_backend.data_packets.Responses.GetUsernameResponse;
 import com.example.chatting_app_backend.services.service;
 
 import jakarta.servlet.ServletRequest;
@@ -30,24 +36,24 @@ public class HttpController {
     service ser;
 
     @GetMapping("/allUsernames")
-    public List<String> getAllUsernames() {
+    public GetAllUsernameResponse getAllUsernames() {
         return ser.getAllUsernames();
     }
 
     @GetMapping("/getUsername")
-    public getUsernameResponse getUsername(ServletRequest request) {
+    public GetUsernameResponse getUsername(ServletRequest request) {
         return ser.getUsername(request);
     }
 
     @GetMapping("/getId")
-    public int getId(@RequestParam String username) {
-        return ser.getId(username);
+    public GetIdResponse getId(@RequestParam GetIdRequest form_data) {
+        return ser.getId(form_data.getUsername());
     }
 
     @PostMapping("/auth/signup")
-    public ResponseEntity<?> signUp(@RequestBody user user) {
+    public ResponseEntity<?> signUp(@RequestBody SignupRequest form_data) {
         try {
-            if (ser.signup(user)) {
+            if (ser.signup(form_data)) {
                 return ResponseEntity.status(HttpStatus.OK).body(null);
             } else {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
@@ -58,32 +64,32 @@ public class HttpController {
     }
 
     @PostMapping("/auth/login")
-    public ResponseEntity<?> login(@RequestBody LoginResponse form_data, HttpServletResponse response) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest form_data, HttpServletResponse response) {
         return ser.login(form_data, response);
     }
 
     @GetMapping("/activeChats")
-    public List<Object[]> getActiveChats(ServletRequest request) {
+    public List<ActiveChatsResponse> getActiveChats(ServletRequest request) {
         return ser.getActiveChats(request);
     }
 
     @GetMapping("/getMessages")
-    public List<Object[]> getMessages(int user1, int user2) {
-        return ser.getMessages(user1, user2);
+    public List<GetMessagesResponse> getMessages(GetMessagesRequest form_data) {
+        return ser.getMessages(form_data);
     }
 
     @PostMapping("/saveMessage")
-    public void saveMessage(@RequestBody messages m) {
-        ser.saveMessage(m);
+    public void saveMessage(@RequestBody SaveMessagesRequest form_data) {
+        ser.saveMessage(form_data);
     }
 
     @PostMapping("/saveLastMessage")
-    public void saveLastMessage(@RequestBody lastMessage lm) { 
-        ser.saveLastMessage(lm);
+    public void saveLastMessage(@RequestBody SaveLastMessageRequest form_data) { 
+        ser.saveLastMessage(form_data);
     }
 
     @GetMapping("/validate")
-    public int validate(ServletRequest request) {
+    public GetIdResponse validate(ServletRequest request) {
         return ser.validate(request);
     }
 }

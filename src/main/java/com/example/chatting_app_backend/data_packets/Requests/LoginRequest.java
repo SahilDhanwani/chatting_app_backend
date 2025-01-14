@@ -1,6 +1,6 @@
-package com.example.chatting_app_backend.responses;
+package com.example.chatting_app_backend.data_packets.Requests;
 
-public class LoginResponse {
+public class LoginRequest {
     private String username;
     private String password;
 

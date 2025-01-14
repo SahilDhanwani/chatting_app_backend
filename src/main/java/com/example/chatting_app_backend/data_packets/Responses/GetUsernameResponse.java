@@ -1,11 +1,7 @@
-package com.example.chatting_app_backend.responses;
+package com.example.chatting_app_backend.data_packets.Responses;
 
-public class getUsernameResponse {
+public class GetUsernameResponse {
     private String username;
-
-    public getUsernameResponse(String username) {
-        this.username = username;
-    }
 
     public String getUsername() {
         return username;

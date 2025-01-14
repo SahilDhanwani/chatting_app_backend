@@ -14,6 +14,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.example.chatting_app_backend.data_packets.Requests.GetMessagesRequest;
+import com.example.chatting_app_backend.data_packets.Requests.LoginRequest;
+import com.example.chatting_app_backend.data_packets.Requests.SaveLastMessageRequest;
+import com.example.chatting_app_backend.data_packets.Requests.SaveMessagesRequest;
+import com.example.chatting_app_backend.data_packets.Requests.SignupRequest;
+import com.example.chatting_app_backend.data_packets.Responses.ActiveChatsResponse;
+import com.example.chatting_app_backend.data_packets.Responses.GetAllUsernameResponse;
+import com.example.chatting_app_backend.data_packets.Responses.GetIdResponse;
+import com.example.chatting_app_backend.data_packets.Responses.GetMessagesResponse;
+import com.example.chatting_app_backend.data_packets.Responses.GetUsernameResponse;
 import com.example.chatting_app_backend.jwt.JwtUtil;
 import com.example.chatting_app_backend.model.lastMessage;
 import com.example.chatting_app_backend.model.messages;
@@ -21,8 +31,6 @@ import com.example.chatting_app_backend.model.user;
 import com.example.chatting_app_backend.repository.LastMessageRepository;
 import com.example.chatting_app_backend.repository.MessageRepository;
 import com.example.chatting_app_backend.repository.UserRepository;
-import com.example.chatting_app_backend.responses.LoginResponse;
-import com.example.chatting_app_backend.responses.getUsernameResponse;
 
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.Cookie;
@@ -49,20 +57,23 @@ public class service {
     @Autowired
     private JwtUtil jwtUtil;
 
-    public boolean signup(user user) {
+    public boolean signup(SignupRequest form_data) {
         // Check if a user with the same username or email already exists
-        int count = user_repo.findFirstByUsernameOrEmail(user.getUsername(), user.getEmail()).getId();
-        if (count > 0) {
-            return false; // User already exists
-        }
-    
+        int count = user_repo.findFirstByUsernameOrEmail(form_data.getUsername(), form_data.getEmail()).getId();
+
+        if (count > 0) return false; // User already exists
+        
         // Encode the user's password before saving
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user user = new user();
+        user.setUsername(form_data.getUsername());
+        user.setPassword(passwordEncoder.encode(form_data.getPassword()));
+        user.setEmail(form_data.getEmail());
+
         user_repo.save(user); // Save user to the database
         return true;
     }
 
-    public ResponseEntity<?> login(@RequestBody LoginResponse form_data, HttpServletResponse response) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest form_data, HttpServletResponse response) {
         try {
             // Retrieve the user from the database by username or email
             user user = user_repo.findFirstByUsernameOrEmail(form_data.getUsername(), form_data.getUsername());
@@ -94,56 +105,73 @@ public class service {
         }
     }
 
-    public messages saveMessage(messages message) {
+    public messages saveMessage(SaveMessagesRequest form_data) {
+
+        messages message = new messages();
+        message.setSender_id(form_data.getSender_id());
+        message.setReceiver_id(form_data.getReceiver_id());
+        message.setMessage(form_data.getMessage());
+        message.setTimestamp(form_data.getTimestamp());
+
         return message_repo.save(message);
     }
 
-    public List<messages> getAllMessages() {
-        return message_repo.findAll();
+    public GetAllUsernameResponse getAllUsernames() {
+        GetAllUsernameResponse response = new GetAllUsernameResponse();
+        response.setUsernames(user_repo.findAllUsernames());
+        return response;
     }
 
-    public List<String> getAllUsernames() {
-       return user_repo.findAllUsernames();
-    }
-
-    public List<Object[]> getActiveChats(ServletRequest request) {
+    public List<ActiveChatsResponse> getActiveChats(ServletRequest request) {
         String token = jwtUtil.extractTokenFromCookie(request);
         int userId = jwtUtil.extractUserId(token);
         String username = user_repo.findById(userId).get().getUsername();
         return last_message_repo.findLastMessage(username);
     }
 
-    public getUsernameResponse getUsername(ServletRequest request) {
+    public GetUsernameResponse getUsername(ServletRequest request) {
         int userId = jwtUtil.extractUserId(jwtUtil.extractTokenFromCookie(request));
         String name = user_repo.findById(userId).get().getUsername();
-        return new getUsernameResponse(name);
+
+        GetUsernameResponse response = new GetUsernameResponse();
+        response.setUsername(name);
+        return response;
     }
 
-    public List<Object[]> getMessages(int user1, int user2) {
-        return message_repo.findMessages(user1, user2);
+    public List<GetMessagesResponse> getMessages(GetMessagesRequest form_data) {
+        return message_repo.findMessages(form_data.getUser1_id(), form_data.getUser2_id());
     }
 
-    public int getId(String username) {
-        return user_repo.findByUsername(username).get(0).getId();
+    public GetIdResponse getId(String username) {
+        GetIdResponse response = new GetIdResponse();
+        response.setId(user_repo.findByUsername(username).get(0).getId());
+        return response;
     }
 
-    public void saveLastMessage(lastMessage lm) {
+    public void saveLastMessage(SaveLastMessageRequest form_data) {
 
-        lastMessage existingRecord = last_message_repo.findByUser1AndUser2(lm.getUser1(), lm.getUser2());
+        lastMessage existingRecord = last_message_repo.findByUser1AndUser2(form_data.getUsername1(), form_data.getUsername2());
 
         if (existingRecord != null) {
 
             // Update the existing record
-            existingRecord.setLastMessage(lm.getLastMessage());
+            existingRecord.setLastMessage(form_data.getLastMessage());
             last_message_repo.save(existingRecord);
         } else {
-            // Save as a new record 
-            last_message_repo.save(lm);
+            // Save as a new record
+            lastMessage message = new lastMessage();
+            message.setUser1(form_data.getUsername1());
+            message.setUser2(form_data.getUsername2());
+            message.setLastMessage(form_data.getLastMessage());
+
+            last_message_repo.save(message);
         }
     }
 
-    public int validate(ServletRequest request) {
+    public GetIdResponse validate(ServletRequest request) {
         String token = jwtUtil.extractTokenFromCookie(request);
-        return jwtUtil.extractUserId(token);
+        GetIdResponse response = new GetIdResponse();
+        response.setId(jwtUtil.extractUserId(token));
+        return response;
     }
 }
