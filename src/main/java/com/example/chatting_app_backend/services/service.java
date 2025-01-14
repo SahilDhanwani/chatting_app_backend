@@ -14,13 +14,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.example.chatting_app_backend.Other.JwtUtil;
+import com.example.chatting_app_backend.jwt.JwtUtil;
 import com.example.chatting_app_backend.model.lastMessage;
 import com.example.chatting_app_backend.model.messages;
 import com.example.chatting_app_backend.model.user;
 import com.example.chatting_app_backend.repository.LastMessageRepository;
 import com.example.chatting_app_backend.repository.MessageRepository;
-import com.example.chatting_app_backend.repository.repository;
+import com.example.chatting_app_backend.repository.UserRepository;
 import com.example.chatting_app_backend.responses.LoginResponse;
 import com.example.chatting_app_backend.responses.getUsernameResponse;
 
@@ -32,13 +32,13 @@ import jakarta.servlet.http.HttpServletResponse;
 public class service {
 
     @Autowired
-    private repository repo;
+    private UserRepository user_repo;
 
     @Autowired
-    private MessageRepository m_repo;
+    private MessageRepository message_repo;
 
     @Autowired
-    private LastMessageRepository lm_repo;
+    private LastMessageRepository last_message_repo;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -51,30 +51,30 @@ public class service {
 
     public boolean signup(user user) {
         // Check if a user with the same username or email already exists
-        int count = repo.findByUsernameOrEmail(user.getUsername(), user.getEmail()).size();
+        int count = user_repo.findFirstByUsernameOrEmail(user.getUsername(), user.getEmail()).getId();
         if (count > 0) {
             return false; // User already exists
         }
     
         // Encode the user's password before saving
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        repo.save(user); // Save user to the database
+        user_repo.save(user); // Save user to the database
         return true;
     }
 
-    public ResponseEntity<?> login(@RequestBody LoginResponse user, HttpServletResponse response) {
+    public ResponseEntity<?> login(@RequestBody LoginResponse form_data, HttpServletResponse response) {
         try {
             // Retrieve the user from the database by username or email
-            int userId = repo.findByUsernameOrEmail(user.getUsername(), user.getUsername()).get(0).getId();
-            
+            user user = user_repo.findFirstByUsernameOrEmail(form_data.getUsername(), form_data.getUsername());
+
             // Authenticate the user using Spring Security's AuthenticationManager
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword())
+                    new UsernamePasswordAuthenticationToken(user.getUsername(), form_data.getPassword())
             );
 
             // If authentication is successful, create and return the authentication token (JWT)
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            String jwtToken = jwtUtil.generateToken(userId);
+            String jwtToken = jwtUtil.generateToken(user.getId());
             
             // Create the HttpOnly cookie for the JWT
             Cookie cookie = new Cookie("JWT", jwtToken);
@@ -95,50 +95,50 @@ public class service {
     }
 
     public messages saveMessage(messages message) {
-        return m_repo.save(message);
+        return message_repo.save(message);
     }
 
     public List<messages> getAllMessages() {
-        return m_repo.findAll();
+        return message_repo.findAll();
     }
 
     public List<String> getAllUsernames() {
-       return repo.findAllUsernames();
+       return user_repo.findAllUsernames();
     }
 
     public List<Object[]> getActiveChats(ServletRequest request) {
         String token = jwtUtil.extractTokenFromCookie(request);
         int userId = jwtUtil.extractUserId(token);
-        String username = repo.findById(userId).get().getUsername();
-        return lm_repo.findLastMessage(username);
+        String username = user_repo.findById(userId).get().getUsername();
+        return last_message_repo.findLastMessage(username);
     }
 
     public getUsernameResponse getUsername(ServletRequest request) {
         int userId = jwtUtil.extractUserId(jwtUtil.extractTokenFromCookie(request));
-        String name = repo.findById(userId).get().getUsername();
+        String name = user_repo.findById(userId).get().getUsername();
         return new getUsernameResponse(name);
     }
 
     public List<Object[]> getMessages(int user1, int user2) {
-        return m_repo.findMessages(user1, user2);
+        return message_repo.findMessages(user1, user2);
     }
 
     public int getId(String username) {
-        return repo.findByUsername(username).get(0).getId();
+        return user_repo.findByUsername(username).get(0).getId();
     }
 
     public void saveLastMessage(lastMessage lm) {
 
-        lastMessage existingRecord = lm_repo.findByUser1AndUser2(lm.getUser1(), lm.getUser2());
+        lastMessage existingRecord = last_message_repo.findByUser1AndUser2(lm.getUser1(), lm.getUser2());
 
         if (existingRecord != null) {
 
             // Update the existing record
             existingRecord.setLastMessage(lm.getLastMessage());
-            lm_repo.save(existingRecord);
+            last_message_repo.save(existingRecord);
         } else {
             // Save as a new record 
-            lm_repo.save(lm);
+            last_message_repo.save(lm);
         }
     }
 

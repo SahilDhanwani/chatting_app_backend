@@ -1,4 +1,4 @@
-package com.example.chatting_app_backend.Other;
+package com.example.chatting_app_backend.jwt;
 
 import java.io.IOException;
 
@@ -15,7 +15,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 
 @Component
-public class JwtAuthenticationFilter implements Filter {
+public class  JwtAuthenticationFilter implements Filter {
 
     @Autowired
     private JwtUtil jwtUtil;

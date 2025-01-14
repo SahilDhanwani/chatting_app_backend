@@ -10,13 +10,15 @@ import com.example.chatting_app_backend.model.user;
 
 
 @Repository
-public interface  repository extends JpaRepository<user, Integer> {
-
-    public List<user> findByUsernameOrEmail(String username, String email);
+public interface  UserRepository extends JpaRepository<user, Integer> {
 
     @Query("SELECT u.username FROM user u")  // JPQL query
     public List<String> findAllUsernames();
 
+    @Query("SELECT u FROM user u WHERE u.username = ?1 OR u.email = ?2")
+    public user findFirstByUsernameOrEmail(String username, String email);
+
     public List<user> findByUsername(String username);
 
+    public List<user> findByEmail(String email);
 }

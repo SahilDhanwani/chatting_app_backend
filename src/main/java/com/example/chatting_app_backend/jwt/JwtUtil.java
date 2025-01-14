@@ -1,4 +1,4 @@
-package com.example.chatting_app_backend.Other;
+package com.example.chatting_app_backend.jwt;
 
 import io.jsonwebtoken.*;
 import jakarta.servlet.ServletRequest;
