@@ -52,6 +52,9 @@ public class HttpController {
 
     @PostMapping("/auth/signup")
     public ResponseEntity<?> signUp(@RequestBody SignupRequest form_data) {
+        System.out.println("HEY HEY HEY HEY HEY HEY HEY HEY HEY HEY HEY HEY HEY");
+        System.out.println(form_data.getEmail());
+        System.out.println("HEY HEY HEY HEY HEY HEY HEY HEY HEY HEY HEY HEY HEY");
         try {
             if (ser.signup(form_data)) {
                 return ResponseEntity.status(HttpStatus.OK).body(null);

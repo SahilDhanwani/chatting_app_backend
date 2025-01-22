@@ -16,7 +16,7 @@ public interface  UserRepository extends JpaRepository<user, Integer> {
     public List<String> findAllUsernames();
 
     @Query("SELECT u FROM user u WHERE u.username = ?1 OR u.email = ?2")
-    public user findFirstByUsernameOrEmail(String username, String email);
+    public List<user> findByUsernameOrEmail(String username, String email);
 
     public List<user> findByUsername(String username);
 

@@ -59,10 +59,15 @@ public class service {
 
     public boolean signup(SignupRequest form_data) {
         // Check if a user with the same username or email already exists
-        int count = user_repo.findFirstByUsernameOrEmail(form_data.getUsername(), form_data.getEmail()).getId();
-
+        int count = user_repo.findByUsernameOrEmail(form_data.getUsername(), form_data.getEmail()).size();
+        System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        System.out.println(count);
+        System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
         if (count > 0) return false; // User already exists
         
+        System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        System.out.println(count);
+        System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
         // Encode the user's password before saving
         user user = new user();
         user.setUsername(form_data.getUsername());
@@ -76,7 +81,7 @@ public class service {
     public ResponseEntity<?> login(@RequestBody LoginRequest form_data, HttpServletResponse response) {
         try {
             // Retrieve the user from the database by username or email
-            user user = user_repo.findFirstByUsernameOrEmail(form_data.getUsername(), form_data.getUsername());
+            user user = user_repo.findByUsernameOrEmail(form_data.getUsername(), form_data.getUsername()).get(0);
 
             // Authenticate the user using Spring Security's AuthenticationManager
             Authentication authentication = authenticationManager.authenticate(
