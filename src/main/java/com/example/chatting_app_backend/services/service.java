@@ -60,14 +60,8 @@ public class service {
     public boolean signup(SignupRequest form_data) {
         // Check if a user with the same username or email already exists
         int count = user_repo.findByUsernameOrEmail(form_data.getUsername(), form_data.getEmail()).size();
-        System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-        System.out.println(count);
-        System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
         if (count > 0) return false; // User already exists
         
-        System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-        System.out.println(count);
-        System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
         // Encode the user's password before saving
         user user = new user();
         user.setUsername(form_data.getUsername());

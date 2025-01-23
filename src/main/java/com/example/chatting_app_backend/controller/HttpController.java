@@ -52,9 +52,6 @@ public class HttpController {
 
     @PostMapping("/auth/signup")
     public ResponseEntity<?> signUp(@RequestBody SignupRequest form_data) {
-        System.out.println("HEY HEY HEY HEY HEY HEY HEY HEY HEY HEY HEY HEY HEY");
-        System.out.println(form_data.getEmail());
-        System.out.println("HEY HEY HEY HEY HEY HEY HEY HEY HEY HEY HEY HEY HEY");
         try {
             if (ser.signup(form_data)) {
                 return ResponseEntity.status(HttpStatus.OK).body(null);
@@ -87,7 +84,14 @@ public class HttpController {
     }
 
     @PostMapping("/saveLastMessage")
-    public void saveLastMessage(@RequestBody SaveLastMessageRequest form_data) { 
+    public void saveLastMessage(@RequestBody SaveLastMessageRequest form_data) {
+
+        ser.saveLastMessage(form_data);
+
+        String temp = form_data.getUsername1();
+        form_data.setUsername1(form_data.getUsername2());
+        form_data.setUsername2(temp);
+
         ser.saveLastMessage(form_data);
     }
 
