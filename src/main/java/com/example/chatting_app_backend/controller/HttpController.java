@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.chatting_app_backend.data_packets.Requests.GetIdRequest;
-import com.example.chatting_app_backend.data_packets.Requests.GetMessagesRequest;
 import com.example.chatting_app_backend.data_packets.Requests.LoginRequest;
 import com.example.chatting_app_backend.data_packets.Requests.SaveLastMessageRequest;
 import com.example.chatting_app_backend.data_packets.Requests.SaveMessagesRequest;
@@ -45,9 +43,14 @@ public class HttpController {
         return ser.getUsername(request);
     }
 
+    @GetMapping("/getIdByUsername")
+    public GetIdResponse getId(@RequestParam String username) {
+        return ser.getIdByUsername(username);
+    }
+
     @GetMapping("/getId")
-    public GetIdResponse getId(@RequestParam GetIdRequest form_data) {
-        return ser.getId(form_data.getUsername());
+    public GetIdResponse getId(ServletRequest request) {
+        return ser.getId(request);
     }
 
     @PostMapping("/auth/signup")
@@ -74,25 +77,18 @@ public class HttpController {
     }
 
     @GetMapping("/getMessages")
-    public List<GetMessagesResponse> getMessages(GetMessagesRequest form_data) {
-        return ser.getMessages(form_data);
+    public List<GetMessagesResponse> getMessages(@RequestParam String user2, ServletRequest request) {
+        return ser.getMessages(user2,request);
     }
 
     @PostMapping("/saveMessage")
-    public void saveMessage(@RequestBody SaveMessagesRequest form_data) {
-        ser.saveMessage(form_data);
+    public void saveMessage(@RequestBody SaveMessagesRequest form_data, ServletRequest request) {
+        ser.saveMessage(form_data, request);
     }
 
     @PostMapping("/saveLastMessage")
-    public void saveLastMessage(@RequestBody SaveLastMessageRequest form_data) {
-
-        ser.saveLastMessage(form_data);
-
-        String temp = form_data.getUsername1();
-        form_data.setUsername1(form_data.getUsername2());
-        form_data.setUsername2(temp);
-
-        ser.saveLastMessage(form_data);
+    public void saveLastMessage(@RequestBody SaveLastMessageRequest form_data, ServletRequest request) {
+        ser.saveLastMessage(form_data, request);
     }
 
     @GetMapping("/validate")

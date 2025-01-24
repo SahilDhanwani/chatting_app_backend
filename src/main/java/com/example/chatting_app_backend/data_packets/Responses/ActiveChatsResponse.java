@@ -4,6 +4,11 @@ public class ActiveChatsResponse {
     private String username;
     private String lastMessage;
 
+    public ActiveChatsResponse(String username, String lastMessage) {
+        this.username = username;
+        this.lastMessage = lastMessage;
+    }
+
     public String getUsername() {
         return username;
     }

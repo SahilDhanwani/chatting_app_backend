@@ -1,10 +1,8 @@
 package com.example.chatting_app_backend.controller;
-
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-
-import com.example.chatting_app_backend.model.messages;
+import com.example.chatting_app_backend.data_packets.WebSocketMessage;
 
 @Controller
 public class SocketController {
@@ -16,11 +14,9 @@ public class SocketController {
     }
 
     @MessageMapping("/send") // Maps to /app/send
-    public void handleMessage(messages message) {
-        System.out.println("Received message: " + message);
-    
+    public void handleMessage(WebSocketMessage form_data) {
         // Send the message to the specific user's queue
-        String receiverId = String.valueOf(message.getReceiver_id());
-        smt.convertAndSendToUser(receiverId, "/queue/messages", message);
+        String receiverId = String.valueOf(form_data.getReceiver_id());
+        smt.convertAndSendToUser(receiverId, "/queue/messages", form_data);
     }
 }

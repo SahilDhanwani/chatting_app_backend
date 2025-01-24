@@ -46,18 +46,6 @@ public class JwtUtil {
         return Integer.parseInt(subject); // Convert the subject (userId) back to an integer
     }
 
-    public String extractUsername(String token) {
-        // Create a Key object from the secret key (using HS512 algorithm)
-        Key key = new SecretKeySpec(secretKey.getBytes(), SignatureAlgorithm.HS512.getJcaName());
-
-        return Jwts.parserBuilder()  // Use the new parserBuilder() method
-                .setSigningKey(key)  // Use the SecretKey for validation
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
-
     public boolean validateToken(String token) {
 
         try {

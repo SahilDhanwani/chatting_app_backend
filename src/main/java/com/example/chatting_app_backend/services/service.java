@@ -14,7 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.example.chatting_app_backend.data_packets.Requests.GetMessagesRequest;
 import com.example.chatting_app_backend.data_packets.Requests.LoginRequest;
 import com.example.chatting_app_backend.data_packets.Requests.SaveLastMessageRequest;
 import com.example.chatting_app_backend.data_packets.Requests.SaveMessagesRequest;
@@ -104,10 +103,10 @@ public class service {
         }
     }
 
-    public messages saveMessage(SaveMessagesRequest form_data) {
+    public messages saveMessage(SaveMessagesRequest form_data, ServletRequest request) {
 
         messages message = new messages();
-        message.setSender_id(form_data.getSender_id());
+        message.setSender_id(jwtUtil.extractUserId(jwtUtil.extractTokenFromCookie(request)));
         message.setReceiver_id(form_data.getReceiver_id());
         message.setMessage(form_data.getMessage());
         message.setTimestamp(form_data.getTimestamp());
@@ -137,37 +136,56 @@ public class service {
         return response;
     }
 
-    public List<GetMessagesResponse> getMessages(GetMessagesRequest form_data) {
-        return message_repo.findMessages(form_data.getUser1_id(), form_data.getUser2_id());
+    public List<GetMessagesResponse> getMessages(String user2, ServletRequest request) {
+        int user1 = jwtUtil.extractUserId(jwtUtil.extractTokenFromCookie(request));
+        return message_repo.findMessages(user1,Integer.parseInt(user2));
     }
 
-    public GetIdResponse getId(String username) {
+    public GetIdResponse getIdByUsername(String username) {
         GetIdResponse response = new GetIdResponse();
         response.setId(user_repo.findByUsername(username).get(0).getId());
         return response;
     }
 
-    public void saveLastMessage(SaveLastMessageRequest form_data) {
+    public void saveLastMessage(SaveLastMessageRequest form_data, ServletRequest request) {
 
-        lastMessage existingRecord = last_message_repo.findByUser1AndUser2(form_data.getUsername1(), form_data.getUsername2());
+        int user_id_1 = jwtUtil.extractUserId(jwtUtil.extractTokenFromCookie(request));
+        String username1 = user_repo.findById(user_id_1).get().getUsername();
 
+        lastMessage existingRecord = last_message_repo.findByUser1AndUser2(username1, form_data.getUsername2());
         if (existingRecord != null) {
-
-            // Update the existing record
             existingRecord.setLastMessage(form_data.getLastMessage());
             last_message_repo.save(existingRecord);
         } else {
-            // Save as a new record
             lastMessage message = new lastMessage();
-            message.setUser1(form_data.getUsername1());
+            message.setUser1(username1);
             message.setUser2(form_data.getUsername2());
             message.setLastMessage(form_data.getLastMessage());
+            last_message_repo.save(message);
+        }
 
+        // Checking and updating the record for the reverse pair
+        existingRecord = last_message_repo.findByUser1AndUser2(form_data.getUsername2(), username1);
+        if (existingRecord != null) {
+            existingRecord.setLastMessage(form_data.getLastMessage());
+            last_message_repo.save(existingRecord);
+        } else {
+            lastMessage message = new lastMessage();
+            message.setUser1(form_data.getUsername2());
+            message.setUser2(username1);
+            message.setLastMessage(form_data.getLastMessage());
             last_message_repo.save(message);
         }
     }
 
     public GetIdResponse validate(ServletRequest request) {
+        String token = jwtUtil.extractTokenFromCookie(request);
+        GetIdResponse response = new GetIdResponse();
+        response.setId(jwtUtil.extractUserId(token));
+        return response;
+    }
+
+    public GetIdResponse getId(ServletRequest request) {
         String token = jwtUtil.extractTokenFromCookie(request);
         GetIdResponse response = new GetIdResponse();
         response.setId(jwtUtil.extractUserId(token));

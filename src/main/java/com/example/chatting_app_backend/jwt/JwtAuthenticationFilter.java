@@ -34,7 +34,7 @@ public class  JwtAuthenticationFilter implements Filter {
             String token = jwtUtil.extractTokenFromCookie(request);
 
             if (jwtUtil.validateToken(token)) {
-                String username = jwtUtil.extractUsername(token);
+                String username = Integer.toString(jwtUtil.extractUserId(token));
                 UsernamePasswordAuthenticationToken authentication = 
                         new UsernamePasswordAuthenticationToken(username, null, null); // No authorities here
                 SecurityContextHolder.getContext().setAuthentication(authentication);
