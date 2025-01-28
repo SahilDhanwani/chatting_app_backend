@@ -18,14 +18,11 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    // @Autowired
-    // private JwtUtil jwtUtil;
-
     @SuppressWarnings("null")
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws/chat")
-                .setAllowedOrigins("http://localhost:4200") // Allow Angular app to connect
+                .setAllowedOrigins("https://www.chat-zone.tech") // Your Amplify frontend domain
                 .addInterceptors(new HandshakeInterceptor() {
                     @Override
                     public boolean beforeHandshake(
@@ -34,26 +31,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         WebSocketHandler wsHandler,
                         Map<String, Object> attributes
                     ) {
-
                         String query = request.getURI().getQuery();
                         if (query != null && query.contains("id=")) {
                             String id = query.split("id=")[1];
                             attributes.put("id", id); // Attach id to the WebSocket session
-                            System.out.println("The id is received: " + id);
                             return true;
                         }
                         return false;
-                        
-                        // System.out.println("The request is received : "+ request);
-
-                        // String token = jwtUtil.extractTokenFromCookie((ServletRequest) request);
-                        // System.out.println("The token is received : "+ token);
-                        // if (jwtUtil.validateToken(token)) {
-                        //     String username = jwtUtil.extractUsername(token);
-                        //     attributes.put("username", username); // Attach username to WebSocket session
-                        //     return true; // Allow handshake
-                        // }
-                        // return false; // Reject handshake if token is invalid
                     }
 
                     @Override
@@ -69,8 +53,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .withSockJS(); // Fallback to SockJS if WebSocket is not supported
     }
 
+    @SuppressWarnings("null")
     @Override
-    public void configureMessageBroker(@SuppressWarnings("null") MessageBrokerRegistry registry) {
+    public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/topic", "/queue"); // Use "/queue" for user-specific messages
         registry.setApplicationDestinationPrefixes("/app");
         registry.setUserDestinationPrefix("/user"); // Prefix for user-specific destinations
