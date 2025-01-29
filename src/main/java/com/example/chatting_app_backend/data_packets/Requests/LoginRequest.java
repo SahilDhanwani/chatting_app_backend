@@ -5,7 +5,6 @@ public class LoginRequest {
     private String password;
 
     public String getUsername() {
-        System.out.println(username);
         return username;
     }
     public String getPassword() {
